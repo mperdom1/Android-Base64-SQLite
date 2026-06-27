@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
         long resultRowId = db.insert(DBHelper.TABLE_REGISTROS, null, values);
 
         if (resultRowId != -1) {
-            Toast.makeText(this, "¡Registro guardado en SQLite con ID #" + resultRowId + "!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "¡Registro guardado con ID #" + resultRowId + "!", Toast.LENGTH_LONG).show();
             ivPreview.setImageResource(android.R.drawable.ic_menu_camera);
             ivPreview.setAlpha(0.3f);
             if (tvPlaceholder != null) tvPlaceholder.setVisibility(View.VISIBLE);
@@ -286,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
         actualizarListaInterna();
 
         if (listaRegistros.isEmpty()) {
-            Toast.makeText(this, "No hay registros guardados aún en SQLite", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No hay registros guardados", Toast.LENGTH_SHORT).show();
             txtBadge.setText("0 notas");
             lvRecords.setVisibility(View.GONE);
         } else {
