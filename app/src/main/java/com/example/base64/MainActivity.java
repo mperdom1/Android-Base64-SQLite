@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText etDescripcion;
     private Button btnTomarFoto, btnGrabarVoz, btnGuardar, btnConsultar;
     private ListView lvRecords;
+    private TextView txtBadge, tvPlaceholder;
 
     private String imagenBase64Val = "";
     private DBHelper dbHelper;
@@ -58,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
         btnGuardar = findViewById(R.id.btn_guardar);
         btnConsultar = findViewById(R.id.btn_consultar);
         lvRecords = findViewById(R.id.lv_records);
+        txtBadge = findViewById(R.id.txt_badge);
+        tvPlaceholder = findViewById(R.id.tv_placeholder_text);
 
         dbHelper = new DBHelper(this);
         listaRegistros = new ArrayList<>();
@@ -154,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
                 ivPreview.setImageBitmap(photo);
+                ivPreview.setAlpha(1.0f);
+                if (tvPlaceholder != null) tvPlaceholder.setVisibility(View.GONE);
                 imagenBase64Val = convertirBitmapABase64(photo);
                 Toast.makeText(this, "Imagen convertida a Base64", Toast.LENGTH_SHORT).show();
 
@@ -200,6 +206,8 @@ public class MainActivity extends AppCompatActivity {
         if (resultRowId != -1) {
             Toast.makeText(this, "¡Registro guardado en SQLite con ID #" + resultRowId + "!", Toast.LENGTH_LONG).show();
             ivPreview.setImageResource(android.R.drawable.ic_menu_camera);
+            ivPreview.setAlpha(0.3f);
+            if (tvPlaceholder != null) tvPlaceholder.setVisibility(View.VISIBLE);
             etDescripcion.setText("");
             imagenBase64Val = "";
         } else {
@@ -241,8 +249,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (listaRegistros.isEmpty()) {
             Toast.makeText(this, "No hay registros guardados aún en SQLite", Toast.LENGTH_SHORT).show();
+            txtBadge.setText("0 notas");
         } else {
             Toast.makeText(this, "Mostrando " + listaRegistros.size() + " registros.", Toast.LENGTH_SHORT).show();
+            txtBadge.setText(listaRegistros.size() + " notas");
+            lvRecords.setVisibility(View.VISIBLE);
         }
     }
 }
