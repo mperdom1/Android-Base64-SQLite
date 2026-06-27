@@ -276,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
             if (tvPlaceholder != null) tvPlaceholder.setVisibility(View.VISIBLE);
             etDescripcion.setText("");
             imagenBase64Val = "";
-            actualizarContador();
+            consultarYMostrarRegistros();
         } else {
             Toast.makeText(this, "Error al guardar en la Base de Datos", Toast.LENGTH_SHORT).show();
         }
