@@ -19,6 +19,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -39,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView ivPreview;
     private EditText etDescripcion;
-    private Button btnTomarFoto, btnGrabarVoz, btnGuardar, btnConsultar;
+    private Button btnTomarFoto, btnGuardar, btnConsultar;
+    private FloatingActionButton btnGrabarVoz;
     private ListView lvRecords;
     private TextView txtBadge, tvPlaceholder;
 
