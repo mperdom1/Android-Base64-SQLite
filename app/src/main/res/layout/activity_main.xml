@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8FAFC"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Laboratorio SQLite, Base64 y Voz"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#0F172A"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1. Captura de Fotografía:"
+                android:textStyle="bold"
+                android:textColor="#334155"
+                android:textSize="14sp"
+                android:layout_marginBottom="6dp"/>
+
+            <ImageView
+                android:id="@+id/iv_preview"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="#E2E8F0"
+                android:scaleType="centerInside"
+                android:src="@android:drawable/ic_menu_camera"
+                android:padding="8dp" />
+
+            <Button
+                android:id="@+id/btn_tomar_foto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TOMAR FOTO (Abrir Cámara)"
+                android:backgroundTint="#059669"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2. Descripción mediante Voz a Texto:"
+                android:textStyle="bold"
+                android:textColor="#334155"
+                android:textSize="14sp"
+                android:layout_marginBottom="6dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <EditText
+                    android:id="@+id/et_descripcion"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Presione grabar y hable..."
+                    android:minLines="3"
+                    android:gravity="top|left"
+                    android:inputType="textMultiLine"
+                    android:background="@android:drawable/editbox_background"
+                    android:padding="8dp"/>
+
+                <Button
+                    android:id="@+id/btn_grabar_voz"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GRABAR"
+                    android:backgroundTint="#2563EB"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="8dp"
+                    android:layout_gravity="center_vertical" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3. Almacenamiento Local (SQLite):"
+                android:textStyle="bold"
+                android:textColor="#334155"
+                android:textSize="14sp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="6dp"/>
+
+            <Button
+                android:id="@+id/btn_guardar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="GUARDAR DATOS EN SQLITE"
+                android:backgroundTint="#4F46E5"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btn_consultar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="CONSULTAR REGISTROS"
+                android:backgroundTint="#0F172A"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Registros Consultados:"
+                android:textStyle="bold"
+                android:textColor="#334155"
+                android:textSize="14sp"
+                android:layout_marginBottom="6dp"/>
+
+            <ListView
+                android:id="@+id/lv_records"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:background="#FFFFFF"
+                android:divider="#E2E8F0"
+                android:dividerHeight="1dp" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
