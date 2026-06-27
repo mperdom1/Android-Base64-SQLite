@@ -37,11 +37,13 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_PERMISSION = 100;
     private static final int REQUEST_AUDIO_PERMISSION = 101;
     private static final int REQUEST_IMAGE_CAPTURE = 200;
+    private static final int REQUEST_IMAGE_PICK = 202;
     private static final int REQUEST_SPEECH_RECOGNIZER = 201;
+    private static final int REQUEST_DETAIL = 203;
 
     private ImageView ivPreview;
     private EditText etDescripcion;
-    private Button btnTomarFoto, btnGuardar, btnConsultar;
+    private Button btnTomarFoto, btnSubirImagen, btnGuardar, btnConsultar;
     private FloatingActionButton btnGrabarVoz;
     private ListView lvRecords;
     private TextView txtBadge, tvPlaceholder;
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         ivPreview = findViewById(R.id.iv_preview);
         etDescripcion = findViewById(R.id.et_descripcion);
         btnTomarFoto = findViewById(R.id.btn_tomar_foto);
+        btnSubirImagen = findViewById(R.id.btn_subir_placeholder);
         btnGrabarVoz = findViewById(R.id.btn_grabar_voz);
         btnGuardar = findViewById(R.id.btn_guardar);
         btnConsultar = findViewById(R.id.btn_consultar);
@@ -69,10 +72,19 @@ public class MainActivity extends AppCompatActivity {
         dbHelper = new DBHelper(this);
         listaRegistros = new ArrayList<>();
 
+        actualizarContador();
+
         btnTomarFoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 verificarPermisosCamara();
+            }
+        });
+
+        btnSubirImagen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirGaleria();
             }
         });
 
@@ -96,6 +108,18 @@ public class MainActivity extends AppCompatActivity {
                 consultarYMostrarRegistros();
             }
         });
+
+        lvRecords.setOnItemClickListener((parent, view, position, id) -> {
+            RegistroModel registro = listaRegistros.get(position);
+            Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+            intent.putExtra("registro", registro);
+            startActivityForResult(intent, REQUEST_DETAIL);
+        });
+    }
+
+    private void abrirGaleria() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, REQUEST_IMAGE_PICK);
     }
 
     private void verificarPermisosCamara() {
@@ -157,24 +181,63 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK && data != null) {
-            if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                Bitmap photo = (Bitmap) data.getExtras().get("data");
-                ivPreview.setImageBitmap(photo);
-                ivPreview.setAlpha(1.0f);
-                if (tvPlaceholder != null) tvPlaceholder.setVisibility(View.GONE);
-                imagenBase64Val = convertirBitmapABase64(photo);
-                Toast.makeText(this, "Imagen convertida a Base64", Toast.LENGTH_SHORT).show();
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_DETAIL) {
+                consultarYMostrarRegistros();
+                return;
+            }
 
-            } else if (requestCode == REQUEST_SPEECH_RECOGNIZER) {
-                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                if (result != null && !result.isEmpty()) {
-                    String speechText = result.get(0);
-                    etDescripcion.setText(speechText);
-                    Toast.makeText(this, "Transcripción completada", Toast.LENGTH_SHORT).show();
+            if (data != null) {
+                if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    procesarImagen(photo);
+
+                } else if (requestCode == REQUEST_IMAGE_PICK) {
+                    try {
+                        Bitmap photo = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+                        procesarImagen(photo);
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Error al cargar imagen de la galería", Toast.LENGTH_SHORT).show();
+                    }
+
+                } else if (requestCode == REQUEST_SPEECH_RECOGNIZER) {
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    if (result != null && !result.isEmpty()) {
+                        String speechText = result.get(0);
+                        etDescripcion.setText(speechText);
+                        Toast.makeText(this, "Transcripción completada", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         }
+    }
+
+    private void procesarImagen(Bitmap photo) {
+        if (photo == null) return;
+        
+        // Escalar imagen si es muy grande para evitar problemas de memoria y base64 gigante
+        Bitmap scaledBitmap = escalarBitmap(photo, 800);
+        
+        ivPreview.setImageBitmap(scaledBitmap);
+        ivPreview.setAlpha(1.0f);
+        if (tvPlaceholder != null) tvPlaceholder.setVisibility(View.GONE);
+        imagenBase64Val = convertirBitmapABase64(scaledBitmap);
+        Toast.makeText(this, "Imagen procesada", Toast.LENGTH_SHORT).show();
+    }
+
+    private Bitmap escalarBitmap(Bitmap bitmap, int maxSize) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        float bitmapRatio = (float) width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(bitmap, width, height, true);
     }
 
     private String convertirBitmapABase64(Bitmap bitmap) {
@@ -213,12 +276,27 @@ public class MainActivity extends AppCompatActivity {
             if (tvPlaceholder != null) tvPlaceholder.setVisibility(View.VISIBLE);
             etDescripcion.setText("");
             imagenBase64Val = "";
+            actualizarContador();
         } else {
             Toast.makeText(this, "Error al guardar en la Base de Datos", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void consultarYMostrarRegistros() {
+        actualizarListaInterna();
+
+        if (listaRegistros.isEmpty()) {
+            Toast.makeText(this, "No hay registros guardados aún en SQLite", Toast.LENGTH_SHORT).show();
+            txtBadge.setText("0 notas");
+            lvRecords.setVisibility(View.GONE);
+        } else {
+            Toast.makeText(this, "Mostrando " + listaRegistros.size() + " registros.", Toast.LENGTH_SHORT).show();
+            txtBadge.setText(listaRegistros.size() + " notas");
+            lvRecords.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void actualizarListaInterna() {
         listaRegistros.clear();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -249,14 +327,15 @@ public class MainActivity extends AppCompatActivity {
         } else {
             adapter.notifyDataSetChanged();
         }
+    }
 
-        if (listaRegistros.isEmpty()) {
-            Toast.makeText(this, "No hay registros guardados aún en SQLite", Toast.LENGTH_SHORT).show();
-            txtBadge.setText("0 notas");
-        } else {
-            Toast.makeText(this, "Mostrando " + listaRegistros.size() + " registros.", Toast.LENGTH_SHORT).show();
-            txtBadge.setText(listaRegistros.size() + " notas");
-            lvRecords.setVisibility(View.VISIBLE);
+    private void actualizarContador() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + DBHelper.TABLE_REGISTROS, null);
+        if (cursor.moveToFirst()) {
+            int count = cursor.getInt(0);
+            txtBadge.setText(count + " notas");
         }
+        cursor.close();
     }
 }

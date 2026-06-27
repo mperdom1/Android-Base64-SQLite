@@ -1,6 +1,8 @@
 package com.example.base64;
 
-public class RegistroModel {
+import java.io.Serializable;
+
+public class RegistroModel implements Serializable {
     private int id;
     private String imagenBase64;
     private String descripcionTexto;
